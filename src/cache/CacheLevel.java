@@ -4,15 +4,17 @@ public class CacheLevel {
 	int level;
 	int cacheSize;
 	int lineSize;
+	int type;
 	int associativityLevel;
 	String hitWritePolicy;
 	String missWritePolicy;
 	int hitCycles;
 	
-	public CacheLevel(int l, int S, int L, int m, String hitP, String missP, int hitCycles){
+	public CacheLevel(int l, int S, int L, int t, int m, String hitP, String missP, int hitCycles){
 		level = l;
 		cacheSize = S;
 		lineSize = L;
+		type = t;
 		associativityLevel = m;
 		hitWritePolicy = hitP;
 		missWritePolicy = missP;
