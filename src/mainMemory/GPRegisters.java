@@ -6,7 +6,8 @@ public class GPRegisters {
 	HashMap<String, int[]> GPRs = new HashMap();
 	public GPRegisters() {
 		int[] x = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1};
-		GPRs.put("reg0", x);
+		int[] y = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+		GPRs.put("reg0", y);
 		GPRs.put("reg1", x);
 		GPRs.put("reg2", x);
 		GPRs.put("reg3", x);

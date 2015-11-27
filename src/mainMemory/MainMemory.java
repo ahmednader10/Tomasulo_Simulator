@@ -1,19 +1,45 @@
 package mainMemory;
 
+
 public class MainMemory {
-	String [] memory;
+	String [][] memory;
 	int memorySize = 64*1024;
 	int hitCycles;
-	int PC;
-	public MainMemory(int cycles){
-		memory = new String[memorySize];
+	int ByteAddress;
+	int LineSize;
+	
+	public MainMemory(int cycles, int S){
+		
 		hitCycles = cycles;
+		LineSize = S;
+		memory = new String[memorySize/S][LineSize/2];
 	}
-	public String[] getMem() {
+	public int getHitCycles() {
+		return hitCycles;
+	}
+	public void setHitCycles(int hitCycles) {
+		this.hitCycles = hitCycles;
+	}
+	public int getByteAddress() {
+		return ByteAddress;
+	}
+	public void setByteAddress(int byteAddress) {
+		ByteAddress = byteAddress;
+	}
+	
+	
+	
+	public int getLineSize() {
+		return LineSize;
+	}
+	public void setLineSize(int lineSize) {
+		LineSize = lineSize;
+	}
+	public String[][] getMem() {
 		return memory;
 	}
 
-	public void setMem(String[] memory) {
+	public void setMem(String[][] memory) {
 		this.memory = memory;
 	}
 }
