@@ -12,7 +12,7 @@ public class Cache {
 		levels = new CacheLevel[l];
 	}
 	
-	public void write(String address) {
+	/*public void write(String address) {
 		for (int i = 0; i < levels.length; i++){
 			if (levels[i].getType() == 0){ //direct mapped
 				int offsetBitsNum = (int) (Math.log( levels[i].getLineSize() ) / Math.log( 2 ));
@@ -56,6 +56,100 @@ public class Cache {
 					}
 				}
 			}
+			if (levels[i].getType() == 1) {
+				
+			}
+		}
+	}*/
+	
+	public void read(String address) {
+		for (int i = 0; i < levels.length; i++){
+			if (levels[i].getType() == 0){ //direct mapped
+				int offsetBitsNum = (int) (Math.log( levels[i].getLineSize() ) / Math.log( 2 ));
+				int numOfLines = levels[i].getLevelSize() / levels[i].getLineSize();
+				int indexBitsNum = (int) (Math.log( numOfLines ) / Math.log( 2 ));
+				int TagBitsNum = 16 - (offsetBitsNum + indexBitsNum);
+				
+				String tagValBin = address.substring(0, TagBitsNum);
+				String indexValBin = address.substring(TagBitsNum, (TagBitsNum + indexBitsNum));
+				
+				int index = Integer.parseInt(indexValBin, 2);
+				
+				String tag = levels[i].getTags()[index];
+		
+				if(tagValBin.equals(tag)){
+					levels[i].setNumOfHits(levels[i].getNumOfHits()+1);
+					return;
+				}
+				else {
+					levels[i].setNumOfMisses(levels[i].getNumOfMisses()+1);
+					if(i == levels.length -1) {
+						String[] block = readBlockFromMemory(tagValBin, indexValBin, i);
+						// write back the block in all levels of cache
+						for (int j = 0; j < levels.length; j++) {
+							String[] tags = levels[j].getTags();
+							String[][] data = levels[j].getData();
+							boolean[] valid = levels[j].getValid();
+							
+							
+							tags[index] = tagValBin;
+							valid[index] = true;
+							for (int k=0; k < block.length;k++) {
+								data[index][k] = block[k];
+							}
+							
+							levels[j].setData(data);
+							levels[j].setTags(tags);
+							levels[j].setValid(valid);
+						}
+					}
+				}
+			}
+			if (levels[i].getType() == 1) { // fully associative
+				int offsetBitsNum = (int) (Math.log( levels[i].getLineSize() ) / Math.log( 2 ));
+				int TagBitsNum = 16 - offsetBitsNum;
+				
+				String tagValBin = address.substring(0, TagBitsNum);
+				for (int j = 0; j < levels[i].getTags().length; j++){
+					if(tagValBin.equals(levels[i].getTags()[j])){
+						levels[i].setNumOfHits(levels[i].getNumOfHits()+1);
+						return;
+					}
+				}
+				//didn't find in Cache
+				levels[i].setNumOfMisses(levels[i].getNumOfMisses()+1);
+				if(i == levels.length -1) {
+					String[] block = readBlockFromMemory(tagValBin, null, i);
+					// write back the block in all levels of cache
+					for (int j = 0; j < levels.length; j++) {
+						String[] tags = levels[j].getTags();
+						String[][] data = levels[j].getData();
+						boolean[] valid = levels[j].getValid();
+						if (LevelisFull(j)) {
+							tags[0] = tagValBin;
+							valid[0] = true;
+							for (int k=0; k < block.length;k++) {
+								data[0][k] = block[k];
+							}
+						}
+						else{
+							int m = getFirstEmptyEntry(i);
+							tags[m] = tagValBin;
+							valid[m] = true;
+							for (int k=0; k < block.length;k++) {
+								data[m][k] = block[k];
+							}
+						}
+						
+						levels[j].setData(data);
+						levels[j].setTags(tags);
+						levels[j].setValid(valid);
+					}
+				}
+			}
+			if(levels[i].getType() == 1){ // set associative
+				
+			}
 		}
 	}
 	
@@ -77,9 +171,15 @@ public class Cache {
 		}
 		return 0;
 	}
-	public String[] getBlockFromMemory(String tag, String index, int level) {
+	public String[] readBlockFromMemory(String tag, String index, int level) {
 		InputOutput io = new InputOutput();
-		String address = tag+index;
+		String address = "";
+		if (index != null){
+			address = tag+index;
+		}
+		else{
+			address = tag;
+		}
 		int bitsleft = 16 - address.length();
 		for(int i = 0; i < bitsleft; i++){
 			address = address + "0";

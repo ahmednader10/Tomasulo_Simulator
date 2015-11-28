@@ -89,6 +89,16 @@ public class InputOutput {
 		String[][] m = memory.getMem();
 		for(int i = 0; i < x.size(); i++) {
 			m[address][i] = x.get(i);
+			
+			String BinAdd = Integer.toBinaryString(address);
+			int bitsleft = 16 - BinAdd.length();
+			
+			for(int j = 0; j < bitsleft; j++){
+				BinAdd = "0"+BinAdd;
+			}
+			
+			cache.read(BinAdd);
+			
 			if (i !=0 && (i % (memory.getLineSize()/2 - 1) == 0)){
 				address++;
 			} 
@@ -96,7 +106,7 @@ public class InputOutput {
 				address = 0;
 			}
 		}
-		ExecuteProgram(x, tempAddress);
+		//ExecuteProgram(x, tempAddress);
 	}
 	
 	public void ExecuteProgram(ArrayList<String> x, int ByteAddress){
@@ -132,14 +142,7 @@ public class InputOutput {
 				String reg2 = instruction[3].substring(0, instruction[3].length());
 				NAND(reg1, reg2, result);
 			}
-			String BinAdd = Integer.toBinaryString(ByteAddress);
-			int bitsleft = 16 - BinAdd.length();
 			
-			for(int j = 0; j < bitsleft; j++){
-				BinAdd = "0"+BinAdd;
-			}
-			
-			cache.write(BinAdd);
 			ByteAddress+=2;
  		}
 		
