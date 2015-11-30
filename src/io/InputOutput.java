@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import tomasulo.ROB;
+
 
 import cache.Cache;
 import cache.CacheLevel;
@@ -18,6 +20,7 @@ public class InputOutput {
 	GPRegisters reg = new GPRegisters();
 	Cache cache;
 	HashMap<String, int[]> GPR = reg.getGPRs();
+	ROB rob;
 	public void inputData() throws NumberFormatException, IOException {
 		BufferedReader in = new BufferedReader (new InputStreamReader (System.in));
 		
@@ -80,6 +83,10 @@ public class InputOutput {
 	    	store.add(instruction);
 	    	instruction = in.readLine();
 	    }
+	    System.out.println("Enter the number of ROB entries:");
+	    int robcount = Integer.parseInt(in.readLine());
+	    rob = new ROB(robcount);
+	    
 	    storeProgram(store);
 	}
 	
