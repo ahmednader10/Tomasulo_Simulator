@@ -10,6 +10,9 @@ public class ROB {
 	public ROB(int count) {
 		Rob = new ROBentry[count];
 		head = tail = 0;
+		for (int i = 0; i < count; i++){
+			Rob[i] = new ROBentry();
+		}
 	}
 
 	public ROBentry[] getRob() {

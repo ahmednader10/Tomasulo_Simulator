@@ -3,25 +3,20 @@ package mainMemory;
 import java.util.HashMap;
 
 public class GPRegisters {
-	HashMap<String, int[]> GPRs = new HashMap();
+	Register[] registers;
 	public GPRegisters() {
-		int[] x = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1};
-		int[] y = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-		GPRs.put("reg0", y);
-		GPRs.put("reg1", x);
-		GPRs.put("reg2", x);
-		GPRs.put("reg3", x);
-		GPRs.put("reg4", x);
-		GPRs.put("reg5", x);
-		GPRs.put("reg6", x);
-		GPRs.put("reg7", x);
+		registers = new Register[8];
+		for (int i = 0; i < 8; i++){
+			registers[i] = new Register();
+		}
 	}
-	public HashMap<String, int[]> getGPRs() {
-		return GPRs;
+	public Register[] getRegisters() {
+		return registers;
 	}
-	public void setGPRs(HashMap<String, int[]> gPRs) {
-		GPRs = gPRs;
+	public void setRegisters(Register[] registers) {
+		this.registers = registers;
 	}
+	
 	
 
 }

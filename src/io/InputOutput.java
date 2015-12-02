@@ -7,20 +7,24 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import tomasulo.ROB;
+import tomasulo.ReservationStations;
 
 
 import cache.Cache;
 import cache.CacheLevel;
+import entries.station;
 
 import mainMemory.GPRegisters;
 import mainMemory.MainMemory;
+import mainMemory.Register;
 
 public class InputOutput {
 	MainMemory memory;
 	GPRegisters reg = new GPRegisters();
 	Cache cache;
-	HashMap<String, int[]> GPR = reg.getGPRs();
+	Register[] GPR = reg.getRegisters();
 	ROB rob;
+	ReservationStations Rstations;
 	public void inputData() throws NumberFormatException, IOException {
 		BufferedReader in = new BufferedReader (new InputStreamReader (System.in));
 		
@@ -87,6 +91,63 @@ public class InputOutput {
 	    int robcount = Integer.parseInt(in.readLine());
 	    rob = new ROB(robcount);
 	    
+	    System.out.println("Enter the size of instruction buffer:");
+	    int Ibuffer = Integer.parseInt(in.readLine());
+	    
+	    System.out.println("Enter the number of stations for Load:");
+	    int ldStations = Integer.parseInt(in.readLine());
+	    
+	    System.out.println("Enter the number of cycles for Load:");
+	    int ldcycles = Integer.parseInt(in.readLine());
+	    
+	    System.out.println("Enter the number of stations for Store:");
+	    int stStations = Integer.parseInt(in.readLine());
+	    
+	    System.out.println("Enter the number of cycles for Store:");
+	    int stcycles = Integer.parseInt(in.readLine());
+	    
+	    System.out.println("Enter the number of stations for ADD:");
+	    int addStations = Integer.parseInt(in.readLine());
+	    
+	    System.out.println("Enter the number of cycles for ADD:");
+	    int addcycles = Integer.parseInt(in.readLine());
+	    
+	    System.out.println("Enter the number of stations for MUL:");
+	    int mulStations = Integer.parseInt(in.readLine());
+	    
+	    System.out.println("Enter the number of cycles for MUL:");
+	    int mulcycles = Integer.parseInt(in.readLine());
+	    
+	    int total = ldStations + stStations + addStations + mulStations;
+	    Rstations = new ReservationStations(total);
+	    
+	    station[] stations = Rstations.getStations();
+	    
+	    int j =0;
+	    for (j = 0; j < ldStations; j++) {
+	    	int n = j+1;
+	    	stations[j] = new station("Load"+n,ldcycles);
+	    }
+	    
+	    for (int k = 0; k < stStations; k++) {
+	    	int n = k+1;
+	    	stations[j] = new station("ST"+n,stcycles);
+	    	j++;
+	    }
+	    
+	    for (int k = 0; k < addStations; k++) {
+	    	int n = k+1;
+	    	stations[j] = new station("ADD"+n,addcycles);
+	    	j++;
+	    }
+	    
+	    for (int k = 0; k < mulStations; k++) {
+	    	int n = k+1;
+	    	stations[j] = new station("MUL"+n,mulcycles);
+	    	j++;
+	    }
+	    
+	    Rstations.setStations(stations);
 	    storeProgram(store);
 	}
 	
@@ -104,7 +165,7 @@ public class InputOutput {
 				BinAdd = "0"+BinAdd;
 			}
 			
-			cache.read(BinAdd);
+			cache.read(BinAdd, memory);
 			
 			if (i !=0 && (i % (memory.getLineSize()/2 - 1) == 0)){
 				address++;
@@ -113,10 +174,10 @@ public class InputOutput {
 				address = 0;
 			}
 		}
-		//ExecuteProgram(x, tempAddress);
+		
 	}
 	
-	public void ExecuteProgram(ArrayList<String> x, int ByteAddress){
+	/*public void ExecuteProgram(ArrayList<String> x, int ByteAddress){
 		for(int i = 0; i < x.size(); i++) {
 			String[] instruction = x.get(i).split(" ");
 			if (instruction[0].equalsIgnoreCase("ADD")){
@@ -261,7 +322,7 @@ public class InputOutput {
 		reg.setGPRs(GPR);
 		//for(int k = 0; k < GPR.get(reg3).length; k++)
 		//		System.out.print(GPR.get(reg3)[k]);
-	}
+	}*/
 	
 	public int boolToDec(int[] x) {
 		int result = 0;

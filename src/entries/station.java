@@ -12,8 +12,8 @@ public class station {
 	int A;
 	int cyclesLeft;
 	
-	public station(){
-		name = "";
+	public station(String n, int c){
+		name = n;
 		busy = false;
 		Op = "";
 		Vj = -1;
@@ -22,7 +22,7 @@ public class station {
 		Qk = "";
 		Dest = -1;
 		A = -1;
-		cyclesLeft = 0;
+		cyclesLeft = c;
 	}
 	public station(String n, boolean b, String o, int vj, int vk, String qj, String qk, int d, int a, int c){
 		name = n;

@@ -6,7 +6,8 @@ public class ReservationStations {
 	station[] stations;
 	int count;
 	public ReservationStations(int c) {
-		stations = new station[c];
+		count = c;
+		stations = new station[count];
 	}
 	public station[] getStations() {
 		return stations;
