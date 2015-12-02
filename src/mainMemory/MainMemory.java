@@ -7,6 +7,7 @@ public class MainMemory {
 	int hitCycles;
 	int ByteAddress;
 	int LineSize;
+	int PC;
 	
 	public MainMemory(int cycles, int S){
 		
@@ -42,4 +43,12 @@ public class MainMemory {
 	public void setMem(String[][] memory) {
 		this.memory = memory;
 	}
+	public int getPC() {
+		return PC;
+	}
+	public void setPC(int pC) {
+		PC = pC;
+	}
+	
+	
 }

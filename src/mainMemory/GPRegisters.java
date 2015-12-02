@@ -1,6 +1,5 @@
 package mainMemory;
 
-import java.util.HashMap;
 
 public class GPRegisters {
 	Register[] registers;

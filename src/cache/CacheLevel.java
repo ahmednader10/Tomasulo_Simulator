@@ -25,8 +25,17 @@ public class CacheLevel {
 		NumOfMisses = 0;
 		NumOfHits = 0;
 		data = new String[S/L][lineSize];
+		for (int i = 0; i < data.length; i++) {
+			for (int j = 0; j < data[i].length; j++)
+				data[i][j] = "";
+		}
 		Tags = new String[S/L];
+		for (int i = 0; i < Tags.length; i++){
+			Tags[i] = "";
+		}
 		valid = new boolean[S/L];
+		for (int i = 0; i < valid.length; i++)
+			valid[i] = false;
 	}
 
 

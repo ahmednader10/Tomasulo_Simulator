@@ -97,6 +97,7 @@ public class Cache {
 	}
 	
 	public void read(String address, MainMemory memory) {
+		
 		for (int i = 0; i < levels.length; i++){
 			if (levels[i].getType() == 0){ //direct mapped
 				int offsetBitsNum = (int) (Math.log( levels[i].getLineSize() ) / Math.log( 2 ));
@@ -118,7 +119,7 @@ public class Cache {
 				else {
 					levels[i].setNumOfMisses(levels[i].getNumOfMisses()+1);
 					if(i == levels.length -1) {
-						String[] block = readBlockFromMemory(memory, tagValBin, indexValBin, i);
+						String[] block = readBlockFromMemory(memory, address, i);
 						// write back the block in all levels of cache
 						write(block, address);
 					}
@@ -138,7 +139,7 @@ public class Cache {
 				//didn't find in Cache
 				levels[i].setNumOfMisses(levels[i].getNumOfMisses()+1);
 				if(i == levels.length -1) {
-					String[] block = readBlockFromMemory(memory, tagValBin, null, i);
+					String[] block = readBlockFromMemory(memory, address, i);
 					// write back the block in all levels of cache
 					write(block, address);
 				}
@@ -166,7 +167,7 @@ public class Cache {
 				//didn't find in Cache
 				levels[i].setNumOfMisses(levels[i].getNumOfMisses()+1);
 				if(i == levels.length -1) {
-					String[] block = readBlockFromMemory(memory, tagValBin, indexValBin, i);
+					String[] block = readBlockFromMemory(memory, address, i);
 					// write back the block in all levels of cache
 					write(block, address);
 				}
@@ -192,19 +193,7 @@ public class Cache {
 		}
 		return 0;
 	}
-	public String[] readBlockFromMemory(MainMemory Mainmemory, String tag, String index, int level) {
-		
-		String address = "";
-		if (index != null){
-			address = tag+index;
-		}
-		else{
-			address = tag;
-		}
-		int bitsleft = 16 - address.length();
-		for(int i = 0; i < bitsleft; i++){
-			address = address + "0";
-		}
+	public String[] readBlockFromMemory(MainMemory Mainmemory, String address, int level) {
 		
 		String[][] memory = Mainmemory.getMem();
 		String[] result = new String[levels[level].getLineSize()/2];
@@ -212,7 +201,6 @@ public class Cache {
 		
 		for (int j = 0; j < result.length; j++) {
 			result[j] = memory[startVal][j];
-			startVal += 2;
 		}
 		return result;
 		

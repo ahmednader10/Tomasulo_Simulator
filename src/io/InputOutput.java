@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashMap;
+
 
 import tomasulo.ROB;
 import tomasulo.ReservationStations;
@@ -77,7 +77,7 @@ public class InputOutput {
 		
 		System.out.println("Enter the starting address for your program:");
 	    int startAddress = Integer.parseInt(in.readLine());
-	    memory.setByteAddress(startAddress);
+	    memory.setPC(startAddress);
 	    
 	    System.out.println("Enter your Program: (The last line should be EOP)");
 	    
@@ -152,26 +152,30 @@ public class InputOutput {
 	}
 	
 	public void storeProgram(ArrayList<String> x){
-		int address = memory.getByteAddress();
-		int tempAddress = memory.getByteAddress();
+		int address = memory.getPC();
+		String BinAdd = Integer.toBinaryString(address);
 		String[][] m = memory.getMem();
 		for(int i = 0; i < x.size(); i++) {
 			m[address][i] = x.get(i);
 			
-			String BinAdd = Integer.toBinaryString(address);
-			int bitsleft = 16 - BinAdd.length();
-			
+			String address2 = Integer.toBinaryString(address);
+			int bitsleft = 16 - address2.length();
 			for(int j = 0; j < bitsleft; j++){
-				BinAdd = "0"+BinAdd;
+				address2 = "0"+address2;
 			}
 			
-			cache.read(BinAdd, memory);
+			cache.read(address2, memory);
 			
+			int Bin = Integer.parseInt(BinAdd, 2);
+			Bin+=2;
+			BinAdd = Integer.toBinaryString(Bin);
+
 			if (i !=0 && (i % (memory.getLineSize()/2 - 1) == 0)){
 				address++;
 			} 
 			if (i == memory.getMem().length - 1) {
 				address = 0;
+				BinAdd = "0";
 			}
 		}
 		
