@@ -13,6 +13,7 @@ public class CacheLevel {
 	boolean[] valid;
 	int NumOfMisses;
 	int NumOfHits;
+	float AMAT;
 	
 	public CacheLevel(int l, int hitCycles, int L, int t, int m, int h, int S){
 		levelSize = S;
@@ -144,5 +145,15 @@ public class CacheLevel {
 		this.level = level;
 	}
 
+
+	public float getAMAT() {
+		return AMAT;
+	}
+
+
+	public void setAMAT(float aMAT) {
+		AMAT = aMAT;
+	}
+	
 	
 }

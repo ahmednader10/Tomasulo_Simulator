@@ -1,5 +1,6 @@
 package cache;
 
+import tomasulo.Simulation;
 import mainMemory.MainMemory;
 
 public class Cache {
@@ -96,7 +97,7 @@ public class Cache {
 		}
 	}
 	
-	public void read(String address, MainMemory memory) {
+	public void read(String address, MainMemory memory, int offset, Simulation sim) {
 		
 		for (int i = 0; i < levels.length; i++){
 			if (levels[i].getType() == 0){ //direct mapped
@@ -114,6 +115,14 @@ public class Cache {
 		
 				if(tagValBin.equals(tag)){
 					levels[i].setNumOfHits(levels[i].getNumOfHits()+1);
+					String instruction = memory.getMem()[Integer.parseInt(address, 2)][offset];
+					//send to instruction buffer
+					String[] x = sim.getInstructionBuffer();
+					if (sim.bufferhasSpace()) {
+						x[sim.getIBindex()] = instruction;
+						sim.incrementIBindex();
+						sim.setInstructionBuffer(x);
+					}
 					return;
 				}
 				else {
@@ -133,6 +142,14 @@ public class Cache {
 				for (int j = 0; j < levels[i].getTags().length; j++){
 					if(tagValBin.equals(levels[i].getTags()[j])){
 						levels[i].setNumOfHits(levels[i].getNumOfHits()+1);
+						String instruction = memory.getMem()[Integer.parseInt(address, 2)][offset];
+						//send to instruction buffer
+						String[] x = sim.getInstructionBuffer();
+						if (sim.bufferhasSpace()) {
+							x[sim.getIBindex()] = instruction;
+							sim.incrementIBindex();
+							sim.setInstructionBuffer(x);
+						}
 						return;
 					}
 				}
@@ -160,6 +177,14 @@ public class Cache {
 				for (int k = 0; k < (levels[i].getLineSize()/2*levels[i].getAssociativityLevel()); k++) {
 					if(tagValBin.equals(levels[i].getTags()[location])){
 						levels[i].setNumOfHits(levels[i].getNumOfHits()+1);
+						String instruction = memory.getMem()[Integer.parseInt(address, 2)][offset];
+						//send to instruction buffer
+						String[] x = sim.getInstructionBuffer();
+						if (sim.bufferhasSpace()) {
+							x[sim.getIBindex()] = instruction;
+							sim.incrementIBindex();
+							sim.setInstructionBuffer(x);
+						}
 						return;
 					}
 					location++;
@@ -172,6 +197,29 @@ public class Cache {
 					write(block, address);
 				}
 			}
+		}
+		String instruction = memory.getMem()[Integer.parseInt(address, 2)][offset];
+		//send to instruction buffer in case of not found in cache
+		String[] x = sim.getInstructionBuffer();
+		if (sim.bufferhasSpace()) {
+			x[sim.getIBindex()] = instruction;
+			sim.incrementIBindex();
+			sim.setInstructionBuffer(x);
+		}
+	}
+	
+	public void calculateAMAT(int total, int memoryCycles) {
+		for (int i = 0; i < levels.length; i++) {
+			int hitTime = levels[i].getHitCycles();
+			int missPenalty = 0;
+			if ( i < levels.length - 1) {
+				missPenalty = levels[i+1].getHitCycles();
+			}
+			else {
+				missPenalty = memoryCycles;
+			}
+			float missRate = levels[i].getNumOfMisses() / total;
+			levels[i].AMAT = hitTime + missPenalty * missRate;
 		}
 	}
 	

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 import tomasulo.ROB;
 import tomasulo.ReservationStations;
+import tomasulo.Simulation;
 
 
 import cache.Cache;
@@ -25,6 +26,7 @@ public class InputOutput {
 	Register[] GPR = reg.getRegisters();
 	ROB rob;
 	ReservationStations Rstations;
+	Simulation sim;
 	public void inputData() throws NumberFormatException, IOException {
 		BufferedReader in = new BufferedReader (new InputStreamReader (System.in));
 		
@@ -87,12 +89,16 @@ public class InputOutput {
 	    	store.add(instruction);
 	    	instruction = in.readLine();
 	    }
+	    System.out.println("Enter the number of instructions issued in the pipeline:");
+	    int pipeline = Integer.parseInt(in.readLine());
+	    
 	    System.out.println("Enter the number of ROB entries:");
 	    int robcount = Integer.parseInt(in.readLine());
 	    rob = new ROB(robcount);
 	    
 	    System.out.println("Enter the size of instruction buffer:");
 	    int Ibuffer = Integer.parseInt(in.readLine());
+	    sim = new Simulation(Ibuffer);
 	    
 	    System.out.println("Enter the number of stations for Load:");
 	    int ldStations = Integer.parseInt(in.readLine());
@@ -126,7 +132,7 @@ public class InputOutput {
 	    int j =0;
 	    for (j = 0; j < ldStations; j++) {
 	    	int n = j+1;
-	    	stations[j] = new station("Load"+n,ldcycles);
+	    	stations[j] = new station("LOAD"+n,ldcycles);
 	    }
 	    
 	    for (int k = 0; k < stStations; k++) {
@@ -148,10 +154,10 @@ public class InputOutput {
 	    }
 	    
 	    Rstations.setStations(stations);
-	    storeProgram(store);
+	    storeProgram(store, pipeline, Rstations, rob);
 	}
 	
-	public void storeProgram(ArrayList<String> x){
+	public void storeProgram(ArrayList<String> x, int pipeline, ReservationStations stats, ROB r){
 		int address = memory.getPC();
 		String BinAdd = Integer.toBinaryString(address);
 		String[][] m = memory.getMem();
@@ -164,7 +170,7 @@ public class InputOutput {
 				address2 = "0"+address2;
 			}
 			
-			cache.read(address2, memory);
+			cache.read(address2, memory, i , sim);
 			
 			int Bin = Integer.parseInt(BinAdd, 2);
 			Bin+=2;
@@ -173,11 +179,13 @@ public class InputOutput {
 			if (i !=0 && (i % (memory.getLineSize()/2 - 1) == 0)){
 				address++;
 			} 
-			if (i == memory.getMem().length - 1) {
+			if (address == memory.getMem().length - 1) {
 				address = 0;
 				BinAdd = "0";
 			}
 		}
+		cache.calculateAMAT(x.size(), memory.getHitCycles());
+		sim.prepare(pipeline, stats, r);
 		
 	}
 	
