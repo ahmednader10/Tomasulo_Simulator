@@ -2,21 +2,20 @@ package entries;
 
 public class ROBentry {
 	String Type;
-	String Dest;
-	String Value;
+	int Dest;
+	int Value;
 	boolean ready;
 	int cyclesLeft;
+	boolean BranchTaken;
 	public ROBentry() {
 		Type = "";
-		Dest = "";
-		Value = "";
-		ready = true;
+		Dest = -1;
+		Value = -1;
+		BranchTaken = false;
 	}
-	public ROBentry(String t, String d, String v, boolean r) {
+	public ROBentry(String t, int d) {
 		Type = t;
 		Dest = d;
-		Value = v;
-		ready = r;
 	}
 	public String getType() {
 		return Type;
@@ -24,16 +23,16 @@ public class ROBentry {
 	public void setType(String type) {
 		Type = type;
 	}
-	public String getDest() {
+	public int getDest() {
 		return Dest;
 	}
-	public void setDest(String dest) {
+	public void setDest(int dest) {
 		Dest = dest;
 	}
-	public String getValue() {
+	public int getValue() {
 		return Value;
 	}
-	public void setValue(String value) {
+	public void setValue(int value) {
 		Value = value;
 	}
 	public boolean isReady() {
@@ -41,6 +40,12 @@ public class ROBentry {
 	}
 	public void setReady(boolean ready) {
 		this.ready = ready;
+	}
+	public boolean isBranchTaken() {
+		return BranchTaken;
+	}
+	public void setBranchTaken(boolean branchTaken) {
+		BranchTaken = branchTaken;
 	}
 	
 	

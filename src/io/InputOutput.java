@@ -103,14 +103,8 @@ public class InputOutput {
 	    System.out.println("Enter the number of stations for Load:");
 	    int ldStations = Integer.parseInt(in.readLine());
 	    
-	    System.out.println("Enter the number of cycles for Load:");
-	    int ldcycles = Integer.parseInt(in.readLine());
-	    
 	    System.out.println("Enter the number of stations for Store:");
 	    int stStations = Integer.parseInt(in.readLine());
-	    
-	    System.out.println("Enter the number of cycles for Store:");
-	    int stcycles = Integer.parseInt(in.readLine());
 	    
 	    System.out.println("Enter the number of stations for ADD:");
 	    int addStations = Integer.parseInt(in.readLine());
@@ -132,12 +126,12 @@ public class InputOutput {
 	    int j =0;
 	    for (j = 0; j < ldStations; j++) {
 	    	int n = j+1;
-	    	stations[j] = new station("LOAD"+n,ldcycles);
+	    	stations[j] = new station("LOAD"+n,0);
 	    }
 	    
 	    for (int k = 0; k < stStations; k++) {
 	    	int n = k+1;
-	    	stations[j] = new station("ST"+n,stcycles);
+	    	stations[j] = new station("ST"+n,0);
 	    	j++;
 	    }
 	    
@@ -185,7 +179,7 @@ public class InputOutput {
 			}
 		}
 		cache.calculateAMAT(x.size(), memory.getHitCycles());
-		sim.prepare(pipeline, stats, r);
+		sim.prepare(pipeline, stats, r, memory);
 		
 	}
 	

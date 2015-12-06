@@ -14,6 +14,49 @@ public class ROB {
 			Rob[i] = new ROBentry();
 		}
 	}
+	public int findDest(int reg) {
+		boolean stop = false;
+		int i = (tail+Rob.length - 1)%Rob.length;
+
+		while (!stop) {
+			if (i == head)
+				stop = true;
+			ROBentry robEntry = (ROBentry) Rob[i];
+			if (robEntry!= null &&
+					robEntry.getDest() == reg
+					&& robEntry.isReady()
+					&& !robEntry.getType().equalsIgnoreCase("BEQ")
+					&& !robEntry.getType().equalsIgnoreCase("SW")) {
+				return robEntry.getValue();
+			}
+			i = (i + Rob.length - 1) % Rob.length;
+		}
+
+		return -1;
+	}
+	public boolean isEmpty(){
+		return head == tail;
+	}
+	
+	public void flush() {
+		head = tail;
+	}
+	
+	public boolean isFull(){
+		return head == ((tail+1)%Rob.length);
+	}
+	
+	public void moveHead(){
+		head++;
+		head %= Rob.length;
+	}
+	
+	public boolean add(ROBentry e){
+		if(isFull()) return false;
+		Rob[tail++] = e;
+		tail %= Rob.length;
+		return true;
+	}
 
 	public ROBentry[] getRob() {
 		return Rob;

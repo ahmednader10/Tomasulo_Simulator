@@ -6,7 +6,7 @@ public class GPRegisters {
 	public GPRegisters() {
 		registers = new Register[8];
 		for (int i = 0; i < 8; i++){
-			registers[i] = new Register();
+			registers[i] = new Register(i);
 		}
 	}
 	public Register[] getRegisters() {

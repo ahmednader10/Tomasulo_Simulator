@@ -6,11 +6,12 @@ public class station {
 	String Op;
 	int Vj;
 	int Vk;
-	String Qj;
-	String Qk;
+	int Qj;
+	int Qk;
 	int Dest;
 	int A;
 	int cyclesLeft;
+	String step;
 	
 	public station(String n, int c){
 		name = n;
@@ -18,13 +19,14 @@ public class station {
 		Op = "";
 		Vj = -1;
 		Vk = -1;
-		Qj = "";
-		Qk = "";
+		Qj = -1;
+		Qk = -1;
 		Dest = -1;
 		A = -1;
 		cyclesLeft = c;
+		step = "";
 	}
-	public station(String n, boolean b, String o, int vj, int vk, String qj, String qk, int d, int a, int c){
+	public station(String n, boolean b, String o, int vj, int vk, int qj, int qk, int d, int a, int c){
 		name = n;
 		busy = b;
 		Op = o;
@@ -35,6 +37,13 @@ public class station {
 		Dest = d;
 		A = a;
 		cyclesLeft = c;
+	}
+	public void clear() {
+		Vj = Vk = Dest = A = cyclesLeft = 0;
+		Qj = Qk = -1;
+		busy = false;
+		Op = null;
+		step = null;
 	}
 	public String getName() {
 		return name;
@@ -66,16 +75,16 @@ public class station {
 	public void setVk(int vk) {
 		Vk = vk;
 	}
-	public String getQj() {
+	public int getQj() {
 		return Qj;
 	}
-	public void setQj(String qj) {
+	public void setQj(int qj) {
 		Qj = qj;
 	}
-	public String getQk() {
+	public int getQk() {
 		return Qk;
 	}
-	public void setQk(String qk) {
+	public void setQk(int qk) {
 		Qk = qk;
 	}
 	public int getDest() {
@@ -95,6 +104,12 @@ public class station {
 	}
 	public void setCyclesLeft(int cyclesLeft) {
 		this.cyclesLeft = cyclesLeft;
+	}
+	public String getStep() {
+		return step;
+	}
+	public void setStep(String step) {
+		this.step = step;
 	}
 	
 	
