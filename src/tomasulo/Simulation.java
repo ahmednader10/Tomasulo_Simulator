@@ -1,5 +1,6 @@
 package tomasulo;
 
+import cache.Cache;
 import mainMemory.GPRegisters;
 import mainMemory.MainMemory;
 import mainMemory.Register;
@@ -15,22 +16,43 @@ public class Simulation {
 	ROB rob;
 	GPRegisters gpr;
 	MainMemory memory;
+	Cache Dcache;
+	
+	boolean finished;
+	boolean committed;
 	public Simulation(int count){
 		InstructionBuffer = new String[count];
 		IBindex = 0;
 		cycle = 0;
 	}
-	public void prepare(int p, ReservationStations s, ROB r, MainMemory m) {
+	public void prepare(int p, ReservationStations s, ROB r, MainMemory m, Cache dcache) {
 		reservationstations = s;
 		pipeline = p;
 		rob = r;
 		gpr = new GPRegisters();
 		memory = m;
-		issue();
+		Dcache = dcache;
+		simulate();
+	}
+	public void simulate() {
+		while (!committed) {
+			
+			issue();
+			execute();
+			write();
+			commit();
+			
+			if (!committed) {
+				cycle++;
+			}	
+		}
+		System.out.println("Cycles: " + cycle);
 	}
 	public void issue(){
-		if (bufferisEmpty() || rob.isFull())
+		if (bufferisEmpty() || rob.isFull()){
+			finished = true;
 			return;
+		}
 		String instruction = getNextInstruction();
 		removeInstruction(instruction);
 		station rs = getEmptyStation(instruction);
@@ -66,6 +88,17 @@ public class Simulation {
 				}
 			}
 			else{
+				if (isMemory(instruction)) {
+					Register source = getInstructionRT(instruction);
+					int imm = getInstructionImm(instruction);
+					int address = source.getValue() + imm;
+					String address2 = Integer.toBinaryString(address);
+					int bitsleft = 16 - address2.length();
+					for(int j = 0; j < bitsleft; j++){
+						address2 = "0"+address2;
+					}
+					rs.setCyclesLeft(Dcache.DcacheRead(address2, memory,false, -1));
+				}
 				if (getInstructionType(instruction).equalsIgnoreCase("beq") || 
 						getInstructionType(instruction).equalsIgnoreCase("sw")) {
 					if (getInstructionRD(instruction).getStatus() != -1) {
@@ -123,6 +156,94 @@ public class Simulation {
 				entry.setCyclesLeft(entry.getCyclesLeft()-1 );
 		}
 	}
+	
+	public void write() {
+		for (int i = 0; i < reservationstations.getStations().length; i++) {
+			station rs = reservationstations.getStations()[i];
+			if (rs.isBusy() && rs.getStep().equalsIgnoreCase("execute") && rs.getCyclesLeft() <= 0) {
+				// Updating ROB
+
+				
+				
+				// Updating Reorder Buffer Entry
+				ROBentry robEntry = (ROBentry) rob.getRob()[rs.getDest()];
+				robEntry.setReady(true);
+				int result = rs.run(memory, Dcache, robEntry); // Value from functional unit
+				if (result == -1)
+					return;
+
+				rs.setStep("write");
+				robEntry.setValue(result);
+
+				if (RSwritesToReg(rs.getOp())
+						&& gpr.getRegisters()[robEntry.getDest()].getStatus() == rs.getDest()) {
+					gpr.getRegisters()[robEntry.getDest()].setStatus(-1);
+				}
+
+				// Updating reservation stations
+				for (int j = 0; j < reservationstations.getStations().length; j++) {
+					station resvStation = reservationstations.getStations()[j];
+					if (rs.getDest() == resvStation.getQj()) {
+						resvStation.setQj(-1);
+						resvStation.setVj(result);
+					}
+					if (rs.getDest() == resvStation.getQk()) {
+						resvStation.setQk(-1);
+						resvStation.setVk(result);
+					}
+				}
+				rs.setBusy(false);
+				rs.clear();
+			}
+
+		}
+	}
+	public void commit() {
+		if (rob.isEmpty()) {
+			if (finished)
+				committed = true;
+			return; // Empty buffer
+		}
+
+		ROBentry entry = (ROBentry) rob.getFirst();		
+		if(!entry.isReady()) return;
+		
+		if (entry.getType().equalsIgnoreCase("sw")) {
+			int add = entry.getDest();
+			String address = Integer.toBinaryString(add);
+			int bitsleft = 16 - address.length();
+			for(int j = 0; j < bitsleft; j++){
+				address = "0"+address;
+			}
+			Dcache.DcacheRead(address, memory, true, entry.getValue());
+			rob.moveHead();
+		}
+		// Assume immediate value is in VALUE field of rob entry
+		else {	
+			if (entry.getType().equalsIgnoreCase("beq")) {
+				if ((entry.getValue() > 0 && entry.isBranchTaken())
+					|| (entry.getValue() < 0 && !entry.isBranchTaken())) {
+					rob.flush();
+	
+					for (int i = 0; i < reservationstations.getStations().length; i++)
+						reservationstations.getStations()[i].clear();
+					for (int i = 0; i < 8; i++)
+						gpr.getRegisters()[i].setStatus(-1);
+	
+					memory.setPC((entry.isBranchTaken()) ? entry.getDest() + entry.getValue()
+							: entry.getDest());
+					finished = false;
+				} else {
+					rob.moveHead();
+				}
+			}
+			else{
+				gpr.getRegisters()[entry.getDest()].setValue(entry.getValue());
+				rob.moveHead();
+			}
+		}
+
+	}
 
 	public boolean isMemory(String instruction) {
 		return getInstructionType(instruction).equalsIgnoreCase("lw") || getInstructionType(instruction).equalsIgnoreCase("sw");
@@ -134,9 +255,19 @@ public class Simulation {
 				|| getInstructionType(instruction).equalsIgnoreCase("nand") || getInstructionType(instruction).equalsIgnoreCase("mul");
 
 	}
+	public boolean RSwritesToReg(String type) {
+		return type.equalsIgnoreCase("lw") || type.equalsIgnoreCase("add")
+				|| type.equalsIgnoreCase("sub") || type.equalsIgnoreCase("addi")
+				|| type.equalsIgnoreCase("nand") || type.equalsIgnoreCase("mul");
+
+	}
 	public String getInstructionType(String x) {
 		String[] instruction = x.split(" ");
 		return instruction[0];
+	}
+	public int getInstructionImm(String x) {
+		String[] instruction = x.split(" ");
+		return Integer.parseInt(instruction[3]);
 	}
 	public Register getInstructionRT(String x) {
 		String[] instruction = x.split(" ");
@@ -169,7 +300,9 @@ public class Simulation {
 		if (getInstructionType(instruction).equalsIgnoreCase("add") || 
 				getInstructionType(instruction).equalsIgnoreCase("sub") || 
 					getInstructionType(instruction).equalsIgnoreCase("nand") ||
-						getInstructionType(instruction).equalsIgnoreCase("addi")){
+						getInstructionType(instruction).equalsIgnoreCase("addi") || 
+							getInstructionType(instruction).equalsIgnoreCase("jmp") ||
+								getInstructionType(instruction).equalsIgnoreCase("jalr")){
 			return "ADD";
 		}
 		else{
@@ -185,7 +318,7 @@ public class Simulation {
 						return "ST";
 					}
 					else{
-						return getInstructionType(instruction);
+						return null;
 					}
 				}
 			}

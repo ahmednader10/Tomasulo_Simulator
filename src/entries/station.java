@@ -1,5 +1,8 @@
 package entries;
 
+import cache.Cache;
+import mainMemory.MainMemory;
+
 public class station {
 	String name;
 	boolean busy;
@@ -38,6 +41,40 @@ public class station {
 		A = a;
 		cyclesLeft = c;
 	}
+	public int run(MainMemory memory, Cache cache, ROBentry rob) {
+		
+		if (Op.equalsIgnoreCase("add")) {
+			return Vj + Vk;
+		}
+		if (Op.equalsIgnoreCase("addi")) {
+			return A;
+		}
+		if (Op.equalsIgnoreCase("sub")) {
+			return Vj - Vk;
+		}
+		if (Op.equalsIgnoreCase("mul")) {
+			return Vj * Vk;
+		}
+		if (Op.equalsIgnoreCase("nand")) {
+			return ~(Vj & Vk);
+		}
+		if (Op.equalsIgnoreCase("lw")) {
+			String [][] y = memory.getMem();
+			
+			return Integer.parseInt(y[A][0]);
+		}
+		if (Op.equalsIgnoreCase("sw")) {
+			rob.setDest(A);
+			return Vk;
+		}
+		if (Op.equalsIgnoreCase("beq")) {
+			rob.setBranchTaken(Vj == Vk);
+			return A;
+		}
+		return -1;
+		
+	}
+
 	public void clear() {
 		Vj = Vk = Dest = A = cyclesLeft = 0;
 		Qj = Qk = -1;

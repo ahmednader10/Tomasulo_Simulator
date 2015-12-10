@@ -34,6 +34,12 @@ public class ROB {
 
 		return -1;
 	}
+	
+	public ROBentry getFirst(){
+		if(isEmpty()) return null;
+		return Rob[head];
+	}
+	
 	public boolean isEmpty(){
 		return head == tail;
 	}

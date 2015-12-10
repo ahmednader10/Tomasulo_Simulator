@@ -1,22 +1,22 @@
 package mainMemory;
 
 public class Register {
-	int[] value;
+	int value;
 	int status;
 	int Name;
 	public Register(int n){
-		value = new int[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+		value = 0;
 		status = -1;
 		Name = n;
 	}
-	public Register(int[] v, int s) {
+	public Register(int v, int s) {
 		value = v;
 		status = s;
 	}
-	public int[] getValue() {
+	public int getValue() {
 		return value;
 	}
-	public void setValue(int[] value) {
+	public void setValue(int value) {
 		this.value = value;
 	}
 	public int getStatus() {

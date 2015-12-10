@@ -22,7 +22,8 @@ import mainMemory.Register;
 public class InputOutput {
 	MainMemory memory;
 	GPRegisters reg = new GPRegisters();
-	Cache cache;
+	Cache Icache;
+	Cache Dcache;
 	Register[] GPR = reg.getRegisters();
 	ROB rob;
 	ReservationStations Rstations;
@@ -44,8 +45,11 @@ public class InputOutput {
 	    
 	    
 	 
-	    cache = new Cache(cacheLevels);
-	    CacheLevel[] levels = cache.getLevels();
+	    Icache = new Cache(cacheLevels);
+	    CacheLevel[] levels = Icache.getLevels();
+	    
+	    Dcache = new Cache(cacheLevels);
+	    CacheLevel[] Dlevels = Dcache.getLevels();
 	  
 	    for (int i = 0; i < cacheLevels; i++) {
 	    	int level = i+1;
@@ -69,8 +73,11 @@ public class InputOutput {
 		    int hitTime = Integer.parseInt(in.readLine());
 		    
 		    levels[i] = new CacheLevel(level, hitTime, L, type, m, hitP, S);
+		    Dlevels[i] = new CacheLevel(level, hitTime, L, type, m, hitP, S);
 	    }
-	    cache.setLevels(levels);
+	    Icache.setLevels(levels);
+	    Dcache.setLevels(levels);
+	    
 	}
 	
 	public void InputProgram() throws NumberFormatException, IOException{
@@ -164,7 +171,7 @@ public class InputOutput {
 				address2 = "0"+address2;
 			}
 			
-			cache.read(address2, memory, i , sim);
+			Icache.read(address2, memory, i , sim);
 			
 			int Bin = Integer.parseInt(BinAdd, 2);
 			Bin+=2;
@@ -178,157 +185,10 @@ public class InputOutput {
 				BinAdd = "0";
 			}
 		}
-		cache.calculateAMAT(x.size(), memory.getHitCycles());
-		sim.prepare(pipeline, stats, r, memory);
+		Icache.calculateAMAT(x.size(), memory.getHitCycles());
+		sim.prepare(pipeline, stats, r, memory, Dcache);
 		
 	}
-	
-	/*public void ExecuteProgram(ArrayList<String> x, int ByteAddress){
-		for(int i = 0; i < x.size(); i++) {
-			String[] instruction = x.get(i).split(" ");
-			if (instruction[0].equalsIgnoreCase("ADD")){
-				String result = instruction[1].substring(0, instruction[1].length()-1);
-				String reg1 = instruction[2].substring(0, instruction[2].length()-1);
-				String reg2 = instruction[3].substring(0, instruction[3].length());
-				ADD(reg1, reg2, result);
-			}
-			if (instruction[0].equalsIgnoreCase("ADDI")){
-				String result = instruction[1].substring(0, instruction[1].length()-1);
-				String reg1 = instruction[2].substring(0, instruction[2].length()-1);
-				int OP2 = Integer.parseInt(instruction[3].substring(0, instruction[3].length()));
-				ADDI(reg1, OP2, result);
-			}
-			if (instruction[0].equalsIgnoreCase("Sub")){
-				String result = instruction[1].substring(0, instruction[1].length()-1);
-				String reg1 = instruction[2].substring(0, instruction[2].length()-1);
-				String reg2 = instruction[3].substring(0, instruction[3].length());
-				SUB(reg1, reg2, result);
-			}
-			if (instruction[0].equalsIgnoreCase("MUL")){
-				String result = instruction[1].substring(0, instruction[1].length()-1);
-				String reg1 = instruction[2].substring(0, instruction[2].length()-1);
-				String reg2 = instruction[3].substring(0, instruction[3].length());
-				MUL(reg1, reg2, result);
-			}
-			if (instruction[0].equalsIgnoreCase("NAND")){
-				String result = instruction[1].substring(0, instruction[1].length()-1);
-				String reg1 = instruction[2].substring(0, instruction[2].length()-1);
-				String reg2 = instruction[3].substring(0, instruction[3].length());
-				NAND(reg1, reg2, result);
-			}
-			
-			ByteAddress+=2;
- 		}
-		
-	}
-	
-	public void ADD (String reg1, String reg2, String reg3) {
-		int OP1 = boolToDec(GPR.get(reg1));
-		int OP2 = boolToDec(GPR.get(reg2));
-		int result = OP1+OP2;
-		String BinRes = Integer.toBinaryString(result);
-		int bitsleft = 16 - BinRes.length();
-		
-		for(int i = 0; i < bitsleft; i++){
-			BinRes = "0"+BinRes;
-		}
-		//System.out.println(BinRes);
-		int[] finalRes = new int[BinRes.length()];
-		for(int j = 0; j < BinRes.length(); j++){
-			finalRes[j] = Character.getNumericValue(BinRes.charAt(j));
-			//System.out.print(finalRes[j]);
-		}
-		GPR.put(reg3, finalRes);
-		reg.setGPRs(GPR);
-		//for(int k = 0; k < GPR.get(reg3).length; k++)
-		//	System.out.print(GPR.get(reg3)[k]);
-	}
-	
-	public void ADDI(String reg1, int OP2, String reg3) {
-		int OP1 = boolToDec(GPR.get(reg1));
-		int result = OP1+OP2;
-		String BinRes = Integer.toBinaryString(result);
-		int bitsleft = 16 - BinRes.length();
-		
-		for(int i = 0; i < bitsleft; i++){
-			BinRes = "0"+BinRes;
-		}
-		//System.out.println(BinRes);
-		int[] finalRes = new int[BinRes.length()];
-		for(int j = 0; j < BinRes.length(); j++){
-			finalRes[j] = Character.getNumericValue(BinRes.charAt(j));
-			//System.out.print(finalRes[j]);
-		}
-		GPR.put(reg3, finalRes);
-		reg.setGPRs(GPR);
-		//System.out.println(GPR.get(reg3)[14]);
-	}
-	
-	public void SUB (String reg1, String reg2, String reg3) {
-		int OP1 = boolToDec(GPR.get(reg1));
-		int OP2 = boolToDec(GPR.get(reg2));
-		int result = OP1-OP2;
-		String BinRes = Integer.toBinaryString(result);
-		int bitsleft = 16 - BinRes.length();
-		
-		for(int i = 0; i < bitsleft; i++){
-			BinRes = "0"+BinRes;
-		}
-		//System.out.println(BinRes);
-		int[] finalRes = new int[BinRes.length()];
-		for(int j = 0; j < BinRes.length(); j++){
-			finalRes[j] = Character.getNumericValue(BinRes.charAt(j));
-			//System.out.print(finalRes[j]);
-		}
-		GPR.put(reg3, finalRes);
-		reg.setGPRs(GPR);
-		//for(int k = 0; k < GPR.get(reg3).length; k++)
-			//	System.out.print(GPR.get(reg3)[k]);
-	}
-	
-	public void MUL (String reg1, String reg2, String reg3) {
-		int OP1 = boolToDec(GPR.get(reg1));
-		int OP2 = boolToDec(GPR.get(reg2));
-		int result = OP1*OP2;
-		String BinRes = Integer.toBinaryString(result);
-		int bitsleft = 16 - BinRes.length();
-		
-		for(int i = 0; i < bitsleft; i++){
-			BinRes = "0"+BinRes;
-		}
-		//System.out.println(BinRes);
-		int[] finalRes = new int[BinRes.length()];
-		for(int j = 0; j < BinRes.length(); j++){
-			finalRes[j] = Character.getNumericValue(BinRes.charAt(j));
-			//System.out.print(finalRes[j]);
-		}
-		GPR.put(reg3, finalRes);
-		reg.setGPRs(GPR);
-		//System.out.println(GPR.get(reg3)[14]);
-	}
-	
-	public void NAND (String reg1, String reg2, String reg3) {
-		int[] c = GPR.get(reg1);
-		int[] d = GPR.get(reg2);
-		String OP1="";
-		String OP2="";
-		for(int i = 0; i < c.length; i++){
-			OP1 += c[i];
-			OP2 += d[i];
-		}
-		
-		int[] finalRes = new int[16];
-		for(int j = 0; j < 16; j++){
-			int x = Character.getNumericValue(OP1.charAt(j));
-			int y = Character.getNumericValue(OP1.charAt(j));
-			finalRes[j] = 1- x*y;
-			//System.out.print(finalRes[j]);
-		}
-		GPR.put(reg3, finalRes);
-		reg.setGPRs(GPR);
-		//for(int k = 0; k < GPR.get(reg3).length; k++)
-		//		System.out.print(GPR.get(reg3)[k]);
-	}*/
 	
 	public int boolToDec(int[] x) {
 		int result = 0;
