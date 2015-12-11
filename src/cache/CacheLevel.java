@@ -14,6 +14,8 @@ public class CacheLevel {
 	int NumOfMisses;
 	int NumOfHits;
 	float AMAT;
+	float missRate;
+	float missPenalty;
 	
 	public CacheLevel(int l, int hitCycles, int L, int t, int m, int h, int S){
 		levelSize = S;
@@ -153,6 +155,26 @@ public class CacheLevel {
 
 	public void setAMAT(float aMAT) {
 		AMAT = aMAT;
+	}
+
+
+	public float getMissRate() {
+		return missRate;
+	}
+
+
+	public void setMissRate(float missRate) {
+		this.missRate = missRate;
+	}
+
+
+	public float getMissPenalty() {
+		return missPenalty;
+	}
+
+
+	public void setMissPenalty(float missPenalty) {
+		this.missPenalty = missPenalty;
 	}
 	
 	

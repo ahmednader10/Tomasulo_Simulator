@@ -326,10 +326,10 @@ public int DcacheRead(String address, MainMemory memory, boolean write, int valu
 						levels[i].setNumOfHits(levels[i].getNumOfHits()+1);
 						cycles += levels[i].getHitCycles();
 						if (write) {
-							if (levels[i].hitWritePolicy == 1) {
+							if (levels[i].hitWritePolicy == 1) { // write back
 								levels[i].data[index][offsetval] = value+"";
 							}
-							else {
+							else { // write through
 								String [][] x = memory.getMem();
 								x[index][offsetval] = value+"";
 								memory.setMem(x);
@@ -360,19 +360,38 @@ public int DcacheRead(String address, MainMemory memory, boolean write, int valu
 		return cycles;
 	}
 	
-	public void calculateAMAT(int total, int memoryCycles) {
+	public float calculateAMAT(int total, int memoryCycles) {
+		float Amat = levels[0].getHitCycles();
+		float missRate = 1;
 		for (int i = 0; i < levels.length; i++) {
-			int hitTime = levels[i].getHitCycles();
-			int missPenalty = 0;
 			if ( i < levels.length - 1) {
-				missPenalty = levels[i+1].getHitCycles();
+				levels[i].missPenalty = levels[i+1].getHitCycles();
 			}
 			else {
-				missPenalty = memoryCycles;
+				levels[i].missPenalty = memoryCycles;
 			}
-			float missRate = levels[i].getNumOfMisses() / total;
-			levels[i].AMAT = hitTime + missPenalty * missRate;
+			levels[i].missRate = levels[i].getNumOfMisses() / total;
+			missRate *= levels[i].missRate;
+			Amat += missRate * levels[i].missPenalty;
 		}
+		return Amat;
+	}
+	
+	public float CPI(int total, int memoryCycles) {
+		float CPI = 1;
+		float missRate = 1;
+		for (int i = 0; i < levels.length; i++) {
+			if ( i < levels.length - 1) {
+				levels[i].missPenalty = levels[i+1].getHitCycles();
+			}
+			else {
+				levels[i].missPenalty = memoryCycles;
+			}
+			levels[i].missRate = levels[i].getNumOfMisses() / total;
+			missRate *= levels[i].missRate;
+			CPI += missRate * levels[i].missPenalty;
+		}
+		return CPI;
 	}
 	
 	public boolean LevelisFull(int address){

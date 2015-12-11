@@ -186,7 +186,7 @@ public class InputOutput {
 			}
 		}
 		Icache.calculateAMAT(x.size(), memory.getHitCycles());
-		sim.prepare(pipeline, stats, r, memory, Dcache);
+		sim.prepare(pipeline, stats, r, memory, Dcache, Icache, x.size());
 		
 	}
 	

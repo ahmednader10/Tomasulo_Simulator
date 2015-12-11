@@ -14,6 +14,7 @@ public class station {
 	int Dest;
 	int A;
 	int cyclesLeft;
+	int tempcyclesleft;
 	String step;
 	
 	public station(String n, int c){
@@ -27,6 +28,7 @@ public class station {
 		Dest = -1;
 		A = -1;
 		cyclesLeft = c;
+		tempcyclesleft = c;
 		step = "";
 	}
 	public station(String n, boolean b, String o, int vj, int vk, int qj, int qk, int d, int a, int c){
@@ -40,6 +42,7 @@ public class station {
 		Dest = d;
 		A = a;
 		cyclesLeft = c;
+		tempcyclesleft = c;
 	}
 	public int run(MainMemory memory, Cache cache, ROBentry rob) {
 		
@@ -76,11 +79,12 @@ public class station {
 	}
 
 	public void clear() {
-		Vj = Vk = Dest = A = cyclesLeft = 0;
+		Vj = Vk = Dest = A = 0;
 		Qj = Qk = -1;
 		busy = false;
 		Op = null;
 		step = null;
+		cyclesLeft = tempcyclesleft;
 	}
 	public String getName() {
 		return name;

@@ -17,6 +17,8 @@ public class Simulation {
 	GPRegisters gpr;
 	MainMemory memory;
 	Cache Dcache;
+	Cache Icache;
+	int totalInstructions;
 	
 	boolean finished;
 	boolean committed;
@@ -25,13 +27,15 @@ public class Simulation {
 		IBindex = 0;
 		cycle = 0;
 	}
-	public void prepare(int p, ReservationStations s, ROB r, MainMemory m, Cache dcache) {
+	public void prepare(int p, ReservationStations s, ROB r, MainMemory m, Cache dcache, Cache icache, int n) {
 		reservationstations = s;
 		pipeline = p;
 		rob = r;
 		gpr = new GPRegisters();
 		memory = m;
 		Dcache = dcache;
+		Icache = icache;
+		totalInstructions = n;
 		simulate();
 	}
 	public void simulate() {
@@ -41,12 +45,20 @@ public class Simulation {
 			execute();
 			write();
 			commit();
-			
-			if (!committed) {
-				cycle++;
-			}	
+			cycle++;
 		}
+		Dcache.calculateAMAT(totalInstructions, memory.getHitCycles());
 		System.out.println("Cycles: " + cycle);
+		for (int i = 0; i < Dcache.getLevels().length; i++) {
+			int level = i+1;
+			System.out.println("Icache level "+level+"'s hit ratio is: "+(1-Icache.getLevels()[i].getMissRate()));
+			System.out.println("Dcache level "+level+"'s hit ratio is: "+(1-Dcache.getLevels()[i].getMissRate()));
+		}
+		System.out.println("Icache's AMAT is: "+Icache.calculateAMAT(totalInstructions, memory.getHitCycles()));
+		System.out.println("Dcache's AMAT is: "+Dcache.calculateAMAT(totalInstructions, memory.getHitCycles()));
+		
+		System.out.println("Icache's IPC is: "+(1.0/Icache.CPI(totalInstructions, memory.getHitCycles())));
+		System.out.println("Dcache's IPC is: "+(1.0/Dcache.CPI(totalInstructions, memory.getHitCycles())));
 	}
 	public void issue(){
 		if (bufferisEmpty() || rob.isFull()){
@@ -67,7 +79,7 @@ public class Simulation {
 					rs.setVj(testRob);
 				} else {
 					rs.setVj(getInstructionRS(instruction).getName());
-				}
+				} 
 				rs.setQj(-1);
 			}
 			if (getInstructionType(instruction).equalsIgnoreCase("add") || 
@@ -161,10 +173,6 @@ public class Simulation {
 		for (int i = 0; i < reservationstations.getStations().length; i++) {
 			station rs = reservationstations.getStations()[i];
 			if (rs.isBusy() && rs.getStep().equalsIgnoreCase("execute") && rs.getCyclesLeft() <= 0) {
-				// Updating ROB
-
-				
-				
 				// Updating Reorder Buffer Entry
 				ROBentry robEntry = (ROBentry) rob.getRob()[rs.getDest()];
 				robEntry.setReady(true);
