@@ -284,11 +284,27 @@ public class Simulation {
 			int index = Character.getNumericValue(instruction[2].charAt(instruction[2].length() - 2));
 			return gpr.getRegisters()[index];
 		}
+		if (getInstructionType(x).equalsIgnoreCase("jmp") || getInstructionType(x).equalsIgnoreCase("JALR")){
+			int index = Character.getNumericValue(instruction[1].charAt(instruction[1].length() - 2));
+			return gpr.getRegisters()[index];
+		}
+		if (getInstructionType(x).equalsIgnoreCase("RET")  ) {
+			int index = Character.getNumericValue(instruction[1].charAt(instruction[1].length() - 1));
+			return gpr.getRegisters()[index];
+		}
 		int index = Character.getNumericValue(instruction[3].charAt(instruction[3].length() - 1));
 		return gpr.getRegisters()[index];
 	}
 	public Register getInstructionRS(String x) {
 		String[] instruction = x.split(" ");
+		if (getInstructionType(x).equalsIgnoreCase("JMP") || getInstructionType(x).equalsIgnoreCase("JALR")) {
+			int index = Character.getNumericValue(instruction[1].charAt(instruction[1].length() - 2));
+			return gpr.getRegisters()[index];
+		}
+		if (getInstructionType(x).equalsIgnoreCase("RET")  ) {
+			int index = Character.getNumericValue(instruction[1].charAt(instruction[1].length() - 1));
+			return gpr.getRegisters()[index];
+		}
 		String reg = instruction[2];
 		int index = Character.getNumericValue(reg.charAt(reg.length() - 2));
 		return gpr.getRegisters()[index];
