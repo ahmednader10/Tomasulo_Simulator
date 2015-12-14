@@ -317,6 +317,10 @@ public class Simulation {
 	}
 	public Register getInstructionRD(String x) {
 		String[] instruction = x.split(" ");
+		if (getInstructionType(x).equalsIgnoreCase("RET")  ) {
+			int index = Character.getNumericValue(instruction[1].charAt(instruction[1].length() - 1));
+			return gpr.getRegisters()[index];
+		}
 		int index = Character.getNumericValue(instruction[1].charAt(instruction[1].length() - 2));
 		return gpr.getRegisters()[index];
 	}
@@ -326,7 +330,9 @@ public class Simulation {
 					getInstructionType(instruction).equalsIgnoreCase("nand") ||
 						getInstructionType(instruction).equalsIgnoreCase("addi") || 
 							getInstructionType(instruction).equalsIgnoreCase("jmp") ||
-								getInstructionType(instruction).equalsIgnoreCase("jalr")){
+								getInstructionType(instruction).equalsIgnoreCase("jalr") ||
+									getInstructionType(instruction).equalsIgnoreCase("ret") ||
+										getInstructionType(instruction).equalsIgnoreCase("beq")){
 			return "ADD";
 		}
 		else{

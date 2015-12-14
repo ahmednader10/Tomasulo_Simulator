@@ -65,7 +65,7 @@ public class station {
 			String [][] y = memory.getMem();
 			if (y[A][0] != null)
 				return Integer.parseInt(y[A][0]);
-			return -1;
+			return 3;
 		}
 		if (Op.equalsIgnoreCase("sw")) {
 			rob.setDest(A);
